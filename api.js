@@ -20,7 +20,11 @@ function setupAPI(window) {
   mainWindow = window
   
   const app = new Elysia({ adapter: node() })
-    .use(cors())
+    .use(    cors({
+      origin: "*",
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),)
     
     // Ruta para navegación básica
     .get('/navigate', ({ query }) => {
@@ -122,9 +126,20 @@ function setupAPI(window) {
       }
     })
     
-    .listen(3001)
-
-  console.log(`API server running at http://localhost:3001`)
+    
+    const ports = [3001, 3002, 3003, 0]
+    
+    for (const port of ports) {
+      try {
+        app.listen(port)
+        console.log(`API server running at http://localhost:${port}`)
+        return
+      } catch (error) {
+        console.log(`Puerto ${port} no disponible, probando siguiente...`)
+      }
+    }
+    
+    console.error('No se pudo iniciar el servidor en ningún puerto disponible')
 }
 
 export { setupAPI }
