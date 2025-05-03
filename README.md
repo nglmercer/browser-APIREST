@@ -56,6 +56,14 @@ Este documento describe las rutas API disponibles en el proyecto para controlar 
 fetch('http://localhost:3001/youtube/dQw4w9WgXcQ')
   .then(response => response.json())
   .then(data => console.log(data));
+
+fetch('http://localhost:3001/key/Space')
+  .then(response => response.json())
+  .then(data => console.log(data));
+
+fetch('http://localhost:3001/navigate?url=https://www.google.com')
+  .then(response => response.json())
+  .then(data => console.log(data));
 ```
 
 ## Configuración
