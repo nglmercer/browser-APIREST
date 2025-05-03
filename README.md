@@ -1,6 +1,11 @@
-# API REST para Control de YouTube
+# API REST para Control de YouTube 
+- [Documentación (es)](readme.md)
+- [Documentation (en)](readme_en.md)
 
 Este documento describe las rutas API disponibles en el proyecto para controlar la aplicación de YouTube.
+
+
+This document describes the available API routes in the project to control the YouTube application.
 
 ## Propiedades Principales
 
