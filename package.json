@@ -1,0 +1,19 @@
+{
+  "name": "electron-adblocker-demo",
+  "version": "1.0.0",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^36.0.0"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/node": "^1.2.6",
+    "@ghostery/adblocker-electron": "2.5.2",
+    "@ghostery/adblocker-electron-preload": "2.5.2",
+    "elysia": "^1.2.25"
+  }
+}
