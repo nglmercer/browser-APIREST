@@ -1,6 +1,6 @@
 # YouTube Control REST API 
-- [Documentation](readme_en.md)
-- [Documentación (es)](readme.md)
+- [Documentation](README_en.md)
+- [Documentación (es)](README.md)
 
 This document describes the available API routes in the project to control the YouTube application.
 
