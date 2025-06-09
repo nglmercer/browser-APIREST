@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia'
 import { node } from '@elysiajs/node'
 import { cors } from '@elysiajs/cors'
-import JSONStore from './store.js'
+import JSONStore from './modules/store.js'
 import navigationRoutes from './routes/navigation.js';
 import mediaKeyRoutes from './routes/mediaKeys.js';
 import shortlinksAdminRoutes from './routes/shortlinksAdmin.js';
