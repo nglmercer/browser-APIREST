@@ -1,76 +1,103 @@
-# API REST para Control de YouTube 
-- [Documentación (es)](README.md)
-- [Documentation (en)](README_en.md)
+# Media Tracker Script (`media-tracker.js`)
 
-Este documento describe las rutas API disponibles en el proyecto para controlar la aplicación de YouTube.
+This script allows you to monitor HTML5 video and audio elements on a web page, providing information about their playback status, progress, and other metadata.
 
+## Features
 
-This document describes the available API routes in the project to control the YouTube application.
+- Tracks all `<video>` and `<audio>` elements on a page.
+- Detects media elements present on initial page load.
+- Detects media elements added dynamically to the page (e.g., via JavaScript).
+- Assigns unique IDs to media elements if they don't have one for tracking purposes.
+- Provides playback status (playing, paused, ended).
+- Calculates and provides playback percentage.
+- Dispatches custom DOM events for various media states.
+- Stores the state of all tracked media in a global object `window.mediaTracker`.
 
-## Propiedades Principales
+## How to Use
 
-- `mainWindow`: Referencia a la ventana principal de Electron
-- `store`: Instancia de JSONStore para manejar shortlinks (almacenado en `data.json`)
+1.  **Include the Script:**
+    Add the `media-tracker.js` script to your HTML page, preferably towards the end of the `<body>` or with the `defer` attribute.
+    ```html
+    <script src="media-tracker.js" defer></script>
+    ```
 
-## Endpoints Disponibles
+2.  **Listen for Custom Events:**
+    The script dispatches the following custom events on the `document` object. You can listen for these events to get real-time updates about media playback.
 
-### 1. Navegación Básica
+    *   **`mediaPlaybackMetadata`**: Fired when a media element's metadata (like duration) is loaded.
+        *   `event.detail`: `{ id: string, duration: number, element: HTMLMediaElement }`
+            *   `id`: The ID of the media element (original or generated).
+            *   `duration`: The total duration of the media in seconds.
+            *   `element`: A reference to the media DOM element.
 
-**GET /navigate**
-- Parámetros:
-  - `url`: URL completa a cargar
-- Ejemplo: `/navigate?url=https://www.google.com`
+    *   **`mediaPlaybackStart`**: Fired when media playback starts or resumes from a paused state.
+        *   `event.detail`: `{ id: string, element: HTMLMediaElement }`
 
-**GET /navigate/*
-- Carga cualquier URL después del prefijo `/navigate/`
-- Añade automáticamente `https://` si no está presente
-- Ejemplo: `/navigate/www.google.com`
+    *   **`mediaPlaybackPause`**: Fired when media playback is paused.
+        *   `event.detail`: `{ id: string, percentage: number, element: HTMLMediaElement }`
+            *   `percentage`: The playback percentage at which the media was paused.
 
-### 2. Shortlinks
+    *   **`mediaPlaybackEnd`**: Fired when media playback reaches the end.
+        *   `event.detail`: `{ id: string, element: HTMLMediaElement }`
 
-**GET /shortlink/:name**
-- Parámetros:
-  - `:name`: Nombre del shortlink
-  - Parámetros adicionales para reemplazar en la URL
-- Ejemplo: `/shortlink/youtube?id=dQw4w9WgXcQ`
+    *   **`mediaPlaybackUpdate`**: Fired frequently as the media plays and its `currentTime` updates.
+        *   `event.detail`: `{ id: string, percentage: number, isPlaying: boolean, duration: number, currentTime: number, element: HTMLMediaElement }`
+            *   `percentage`: Current playback percentage (0-100).
+            *   `isPlaying`: Boolean, true if currently playing.
+            *   `duration`: Total duration of the media.
+            *   `currentTime`: Current playback time in seconds.
 
-**POST /shortlink**
-- Cuerpo (JSON):
-  - `name`: Nombre del nuevo shortlink
-  - `url`: URL con parámetros (ej: `https://example.com/:id`)
+    **Example:**
+    ```javascript
+    document.addEventListener('mediaPlaybackStart', (e) => {
+        console.log('Media started:', e.detail.id, e.detail.element);
+    });
 
-### 3. YouTube
+    document.addEventListener('mediaPlaybackUpdate', (e) => {
+        console.log(
+            `Media update for ${e.detail.id}:`,
+            `Percentage: ${e.detail.percentage.toFixed(2)}%`,
+            `Is Playing: ${e.detail.isPlaying}`
+        );
+    });
 
-**GET /youtube/:id**
-- Carga directamente un video de YouTube
-- Ejemplo: `/youtube/dQw4w9WgXcQ`
+    document.addEventListener('mediaPlaybackPause', (e) => {
+        console.log('Media paused:', e.detail.id, `at ${e.detail.percentage.toFixed(2)}%`);
+    });
+    ```
 
-### 4. Control por Teclado
+3.  **Accessing Data via Global Object (Alternative):**
+    The script also maintains a global object `window.mediaTracker` which stores the current state of all tracked media elements. The key for each element is its ID (original or generated).
 
-**GET /key/:key**
-- Envía una pulsación de tecla
-- Ejemplo: `/key/Space` (play/pause)
+    *   `window.mediaTracker[elementId]` contains:
+        *   `element`: Reference to the DOM element.
+        *   `isPlaying`: Boolean, true if currently playing.
+        *   `percentage`: Current playback percentage.
+        *   `duration`: Media duration in seconds.
 
-**GET /keys**
-- Devuelve lista de teclas disponibles
+    **Example:**
+    ```javascript
+    // Get status for a specific media element
+    const myVideoStatus = window.mediaTracker['video1'];
+    if (myVideoStatus) {
+        console.log('Current status of video1:', myVideoStatus);
+    }
 
-## Ejemplo de Uso
+    // Iterate over all tracked media
+    for (const mediaId in window.mediaTracker) {
+        if (window.mediaTracker.hasOwnProperty(mediaId)) {
+            const mediaInfo = window.mediaTracker[mediaId];
+            console.log(`Info for ${mediaId}: Playing - ${mediaInfo.isPlaying}, Percentage - ${mediaInfo.percentage}%`);
+        }
+    }
+    ```
+    Note: While convenient, listening to custom events is generally preferred for reacting to changes, as it's more event-driven.
 
-```javascript
-// Ejemplo usando fetch
-fetch('http://localhost:3001/youtube/dQw4w9WgXcQ')
-  .then(response => response.json())
-  .then(data => console.log(data));
+## Files
 
-fetch('http://localhost:3001/key/Space')
-  .then(response => response.json())
-  .then(data => console.log(data));
+*   `media-tracker.js`: The core JavaScript file.
+*   `test.html`: A demonstration and test page showing how to use the script and observe its behavior.
 
-fetch('http://localhost:3001/navigate?url=https://www.google.com')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
+## How it Works
 
-## Configuración
-
-El servidor API se ejecuta en `http://localhost:3001`
+The script scans the DOM for `<video>` and `<audio>` elements. For each element, it attaches event listeners (`play`, `pause`, `ended`, `timeupdate`, `loadedmetadata`). When these events fire, the script updates its internal tracking information and dispatches the corresponding custom DOM events. A `MutationObserver` is used to detect and handle media elements that are added to the page after the initial load.
